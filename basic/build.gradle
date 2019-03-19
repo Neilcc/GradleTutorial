@@ -1,0 +1,120 @@
+defaultTasks 'hello', 'loadfile'
+
+task hello{
+    doLast{
+        println 'hello world'
+    }
+}
+
+task intro {
+    dependsOn hello
+    doLast{
+        println 'I\'m gradle'
+    }
+}
+
+4.times {
+    counter -> 
+     task "task$counter"{
+         doLast{
+             println "I'm  task number $counter"
+         }
+     }
+}
+
+task0.dependsOn task2, task3
+
+hello.doFirst{
+    println 'hello venus'
+}
+
+hello.configure{
+    doLast{
+        println "hello mars"
+    }
+}
+
+hello.configure{
+    doLast{
+        println "hellp JUpiter"
+    }
+}
+
+task zccTask{
+    ext.zccc = "zcccccaaaa"
+}
+
+task printProperties {
+    doLast{
+        println zccTask.zccc
+    }
+}
+
+task loadfile{
+    doLast{
+        fileList("../").each{
+            File file -> 
+                    println "this is file : $file.name"
+        }
+    }
+}
+
+task loadfolder{
+    doLast{
+        folderList("../").each{
+            File file ->
+                println "this is folder : $file.name"
+        }
+    }
+}
+
+File[] fileList (String dir){
+    file(dir).listFiles({file -> file.isFile()} as FileFilter).sort()
+}
+
+File[] folderList (String dir){
+    file(dir).listFiles({
+        file -> file.isDirectory()
+    }   as FileFilter
+    ).sort()
+}
+
+task distribution {
+    doLast {
+        println "we build zip with version=$version"
+    }
+}
+
+task release {
+    dependsOn 'distribution'
+    doLast {
+        println "we release now"
+    }
+}
+
+gradle.taskGraph.whenReady {
+    taskGraph ->
+        if(taskGraph.hasTask(":release")){
+            version = "1.0"
+        }else{
+            version = "1.0-SNAPSHOT"
+        }
+}
+
+import org.apache.commons.codec.binary.Base64
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'commons-codec', name: 'commons-codec', version: '1.2'
+    }
+}
+
+task encode {
+    doLast {
+        def byte[] encodedString = new Base64().encode('hello world\n'.getBytes())
+        println new String(encodedString)
+    }
+}
